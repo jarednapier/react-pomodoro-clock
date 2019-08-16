@@ -1,26 +1,21 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './CSS/App.css';
+import UserSetTime from './UserSetTime';
+import Timer from './Timer';
+import Controls from './Controls';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+    return (
+        <div className="clock-container">
+            <h1 id="title">POMODORO CLOCK</h1>
+            <div className="settings">
+                <UserSetTime />
+                <UserSetTime />
+            </div>
+            <Timer />
+            <Controls />
+        </div>
+    );
+};
 
 export default App;
