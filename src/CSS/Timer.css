@@ -1,0 +1,22 @@
+.timer-container {
+    border: thick solid rgb(3, 39, 59);
+    border-radius: 50px;
+    user-select: none;
+    width: 300px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#time-left {
+    font-size: 3em;
+}
+
+#timer-label {
+    margin-bottom: -15px;
+    margin-top: 40px;
+}
