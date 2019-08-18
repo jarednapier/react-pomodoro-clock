@@ -15,13 +15,15 @@ const UserSetTime = (props) => {
                     className="icon"
                     id={props.iconIdInc}
                     size="3x"
+                    onClick={() => {props.increment()}}
                 />
-                <p id={props.lengthId} className="length">time goes here</p>
+                <p id={props.lengthId} className="length">{props.timeLength.toString()}</p>
                 <FontAwesomeIcon
                     icon={faArrowDown}
                     className="icon"
                     id={props.iconIdDec}
                     size="3x"
+                    onClick={() => {props.decrement()}}
                 />
             </div>
         </div>
@@ -33,7 +35,10 @@ UserSetTime.propTypes = {
     labelId: PropTypes.string.isRequired,
     iconIdDec: PropTypes.string.isRequired,
     iconIdInc: PropTypes.string.isRequired,
-    lengthId: PropTypes.string.isRequired
+    lengthId: PropTypes.string.isRequired,
+    timeLength: PropTypes.number.isRequired,
+    increment: PropTypes.func.isRequired,
+    decrement: PropTypes.func.isRequired
 };
 
 export default UserSetTime;
