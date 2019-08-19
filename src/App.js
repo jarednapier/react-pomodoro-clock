@@ -1,17 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './CSS/App.css';
 import UserSetTime from './UserSetTime';
 import Timer from './Timer';
 import Controls from './Controls';
+import { millisecondsToTimeString, minToMilli } from './Utilities';
+import wav_timerFinished from './Media/timerFinished.wav';
 
 const App = () => {
 
+    const [sessionActiveFlag, setSessionActiveFlag] = useState(true);
     const [session, setSession] = useState(25);
     const [rest, setRest] = useState(5);
+    const [sessionMilliseconds, setSessionMilliseconds] = useState(minToMilli(session));
+    const [restMilliseconds, setRestMilliseconds] = useState(minToMilli(rest));
+    const [display, setDisplay] = useState(millisecondsToTimeString(sessionMilliseconds));
     const [timerActiveFlag, setTimerActiveFlag] = useState(false);
 
-    const isActive = () => {
-        setTimerActiveFlag(!timerActiveFlag);
+    var audio = null;
+    var interval = undefined;
+
+    useEffect(
+        () => {
+            audio = document.getElementById("beep");
+        }, []
+    );
+
+    useEffect(
+        () => {
+            setSessionMilliseconds(minToMilli(session));
+            setRestMilliseconds(minToMilli(rest));
+        }, [session, rest]
+    );
+
+    useEffect(
+        () => {
+            // console.log("Updating display");
+            if(display === "00:00") {
+                audio = document.getElementById("beep");
+                audio.play();
+                if(sessionActiveFlag) {
+                    setSessionMilliseconds(minToMilli(session));
+                } else {
+                    setRestMilliseconds(minToMilli(rest));
+                }
+                setSessionActiveFlag(!sessionActiveFlag);
+            }
+            if(sessionActiveFlag) {
+                setDisplay(millisecondsToTimeString(sessionMilliseconds));
+            } else {
+                setDisplay(millisecondsToTimeString(restMilliseconds));    
+            }
+        }, [sessionActiveFlag, sessionMilliseconds, restMilliseconds]
+    );
+
+    const flagRef = useRef(sessionActiveFlag);
+    flagRef.current = sessionActiveFlag;
+
+    const startStop = () => {
+        if(timerActiveFlag) {
+            // console.log("timerActiveFlag is true...");
+            clearInterval(interval);
+            interval = undefined;
+            setTimerActiveFlag(false);
+        } else {
+            // console.log("timerActiveFlag is false...");
+            setTimerActiveFlag(true);
+            interval = setInterval(
+                () => {
+                    // console.log("SetInterval function running...");
+                    if(flagRef.current) {
+                        setSessionMilliseconds(current => current - 1000);
+                    } else {
+                        setRestMilliseconds(current => current - 1000);
+                    }
+                }, 1000);
+        }
     };
 
     const incrementSession = () => {
@@ -43,8 +106,15 @@ const App = () => {
     };
 
     const reset = () => {
+        audio = null;
+        clearInterval(interval);
+        interval = undefined;
+        setTimerActiveFlag(false);
+        setSessionActiveFlag(true);
         setRest(5);
         setSession(25);
+        setSessionMilliseconds(minToMilli(25));
+        setRestMilliseconds(minToMilli(5));
     }
 
     return (
@@ -72,7 +142,9 @@ const App = () => {
                     decrement={decrementSession}
                 />
             </div>
-            <Timer sessionTime={session} restTime={rest} reset={reset} active={isActive} activeFlag={timerActiveFlag}/>
+            <Timer display={display} sessionActive={sessionActiveFlag}/>
+            <Controls reset={reset} startStop={startStop} />
+            <audio src={wav_timerFinished} id="beep"/>
         </div>
     );
 };

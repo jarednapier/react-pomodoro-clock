@@ -7,7 +7,7 @@ import { faPlay, faPause, faUndo } from '@fortawesome/free-solid-svg-icons';
 const Controls = (props) => {
     return (
         <div className="controls-container">
-            <div id="start_stop">
+            <div id="start_stop" onClick={() => {props.startStop();}}>
                 <FontAwesomeIcon
                     icon={faPlay}
                     className="icon"
@@ -24,14 +24,15 @@ const Controls = (props) => {
                 className="icon"
                 id="reset"
                 size="3x"
-                onClick={props.reset}
+                onClick={() => {props.reset();}}
             />
         </div>
     );
 };
 
 Controls.propTypes = {
-    reset: PropTypes.func.isRequired
+    reset: PropTypes.func.isRequired,
+    startStop: PropTypes.func.isRequired
 };
 
 export default Controls;
