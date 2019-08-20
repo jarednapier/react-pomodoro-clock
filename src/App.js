@@ -13,9 +13,9 @@ export default class App extends React.Component {
             sessionActiveFlag: true,
             session: 25,
             rest: 5,
-            sessionMilliseconds: minToMilli(session),
-            restMilliseconds: minToMilli(rest),
-            display: millisecondsToTimeString(sessionMilliseconds),
+            sessionMilliseconds: minToMilli(25),
+            restMilliseconds: minToMilli(5),
+            display: millisecondsToTimeString(25 * 60 * 1000),
             timerActiveFlag: false
         };
         this.audio = null;
@@ -134,8 +134,8 @@ export default class App extends React.Component {
                         iconIdInc="break-increment"
                         lengthId="break-length"
                         timeLength={this.state.rest}
-                        increment={incrementRest}
-                        decrement={decrementRest}
+                        increment={this.incrementRest}
+                        decrement={this.decrementRest}
                     />
                     <UserSetTime
                         title="Session Length"
@@ -144,12 +144,12 @@ export default class App extends React.Component {
                         iconIdInc="session-increment"
                         lengthId="session-length"
                         timeLength={this.state.session}
-                        increment={incrementSession}
-                        decrement={decrementSession}
+                        increment={this.incrementSession}
+                        decrement={this.decrementSession}
                     />
                 </div>
                 <Timer display={this.state.display} sessionActive={this.state.sessionActiveFlag}/>
-                <Controls reset={reset} startStop={startStop} />
+                <Controls reset={this.reset} startStop={this.startStop} />
                 <audio src={wav_timerFinished} id="beep"/>
             </div>
         );
