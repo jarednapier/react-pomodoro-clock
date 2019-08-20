@@ -15,13 +15,13 @@ const App = () => {
     const [restMilliseconds, setRestMilliseconds] = useState(minToMilli(rest));
     const [display, setDisplay] = useState(millisecondsToTimeString(sessionMilliseconds));
     const [timerActiveFlag, setTimerActiveFlag] = useState(false);
+    const [intervalState, setIntervalState] = useState(null);
+    const [audioState, setAudioState] = useState(null);
 
-    var audio = null;
-    var interval = undefined;
 
     useEffect(
         () => {
-            audio = document.getElementById("beep");
+            setAudioState(document.getElementById("beep"));
         }, []
     );
 
@@ -32,83 +32,95 @@ const App = () => {
         }, [session, rest]
     );
 
+    const flagRef = useRef(sessionActiveFlag);
+    flagRef.current = sessionActiveFlag;
+
+    const timerRef = useRef(timerActiveFlag);
+    timerRef.current = timerActiveFlag;
+
+    const intervalRef = useRef(intervalState);
+    intervalRef.current = intervalState;
+
     useEffect(
         () => {
             // console.log("Updating display");
-            if(display === "00:00") {
-                audio = document.getElementById("beep");
-                audio.play();
-                if(sessionActiveFlag) {
+            if (sessionMilliseconds === -1000 || restMilliseconds === -1000) {
+                setDisplay("00:00");
+                audioState.play();
+                if (sessionActiveFlag) {
                     setSessionMilliseconds(minToMilli(session));
                 } else {
                     setRestMilliseconds(minToMilli(rest));
                 }
                 setSessionActiveFlag(!sessionActiveFlag);
             }
-            if(sessionActiveFlag) {
+            if (sessionActiveFlag) {
                 setDisplay(millisecondsToTimeString(sessionMilliseconds));
             } else {
-                setDisplay(millisecondsToTimeString(restMilliseconds));    
+                setDisplay(millisecondsToTimeString(restMilliseconds));
             }
-        }, [sessionActiveFlag, sessionMilliseconds, restMilliseconds]
+        }, [sessionActiveFlag, sessionMilliseconds, restMilliseconds, audioState, rest, session]
     );
 
-    const flagRef = useRef(sessionActiveFlag);
-    flagRef.current = sessionActiveFlag;
-
-    const startStop = () => {
-        if(timerActiveFlag) {
-            // console.log("timerActiveFlag is true...");
-            clearInterval(interval);
-            interval = undefined;
-            setTimerActiveFlag(false);
+    const handleInterval = () => {
+        if (timerRef.current) {
+            clearInterval(intervalRef.current);
         } else {
-            // console.log("timerActiveFlag is false...");
-            setTimerActiveFlag(true);
-            interval = setInterval(
+            setIntervalState(setInterval(
                 () => {
                     // console.log("SetInterval function running...");
-                    if(flagRef.current) {
+                    if (flagRef.current) {
                         setSessionMilliseconds(current => current - 1000);
                     } else {
                         setRestMilliseconds(current => current - 1000);
                     }
-                }, 1000);
+                }, 1000));
+        }
+    };
+
+    const startStop = () => {
+        if (timerActiveFlag) {
+            // console.log("timerActiveFlag is true...");
+            handleInterval();
+            setTimerActiveFlag(false);
+        } else {
+            // console.log("timerActiveFlag is false...");
+            handleInterval();
+            setTimerActiveFlag(true);
         }
     };
 
     const incrementSession = () => {
-        if(session === 60 || timerActiveFlag) {
+        if (session === 60 || timerActiveFlag) {
             return;
         }
         setSession(session + 1);
     };
 
     const decrementSession = () => {
-        if(session === 1 || timerActiveFlag) {
+        if (session === 1 || timerActiveFlag) {
             return;
         }
         setSession(session - 1);
     };
 
     const incrementRest = () => {
-        if(rest === 60 || timerActiveFlag) {
+        if (rest === 60 || timerActiveFlag) {
             return;
         }
         setRest(rest + 1);
     };
 
     const decrementRest = () => {
-        if(rest === 1 || timerActiveFlag) {
+        if (rest === 1 || timerActiveFlag) {
             return;
         }
         setRest(rest - 1);
     };
 
     const reset = () => {
-        audio = null;
-        clearInterval(interval);
-        interval = undefined;
+        audioState.load();
+        clearInterval(intervalRef.current);
         setTimerActiveFlag(false);
         setSessionActiveFlag(true);
         setRest(5);
@@ -121,7 +133,7 @@ const App = () => {
         <div className="clock-container">
             <h1 id="title">Pomodoro Clock</h1>
             <div className="settings">
-                <UserSetTime 
+                <UserSetTime
                     title="Break Length"
                     labelId="break-label"
                     iconIdDec="break-decrement"
@@ -142,9 +154,9 @@ const App = () => {
                     decrement={decrementSession}
                 />
             </div>
-            <Timer display={display} sessionActive={sessionActiveFlag}/>
+            <Timer display={display} sessionActive={sessionActiveFlag} />
             <Controls reset={reset} startStop={startStop} />
-            <audio src={wav_timerFinished} id="beep"/>
+            <audio src={wav_timerFinished} id="beep" />
         </div>
     );
 };
